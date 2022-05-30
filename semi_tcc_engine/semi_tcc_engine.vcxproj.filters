@@ -38,4 +38,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\croki.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\akiraposter.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\croc_studios.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>
