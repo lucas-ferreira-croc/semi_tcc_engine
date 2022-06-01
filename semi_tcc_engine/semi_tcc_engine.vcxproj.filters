@@ -27,6 +27,15 @@
     <ClCompile Include="src\shader\shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\io\joystick.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\keyboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\mouse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\fragment_shader.glsl" />
@@ -35,6 +44,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\shader\shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\io\joystick.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\io\keyboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\io\mouse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -46,6 +64,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="assets\croc_studios.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\croc_studios.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

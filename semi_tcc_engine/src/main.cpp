@@ -12,8 +12,18 @@
 
 #include "shader/shader.h"
 
+#include "io/keyboard.h"
+#include "io/mouse.h"
+#include "io/joystick.h"
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void process_input(GLFWwindow* window);
+
+float mixRatio = 0.5f;
+
+glm::mat4 transform = glm::mat4(1.0f);
+joystick mainJ(0);
+
 
 int main() {
 
@@ -49,6 +59,11 @@ int main() {
 	glViewport(0, 0 ,  800, 600);
 	
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetKeyCallback(window, keyboard::keyCallback);
+	
+	glfwSetCursorPosCallback(window, mouse::cursorPosCallback);
+	glfwSetMouseButtonCallback(window, mouse::mouseButtonCallback);
+	glfwSetScrollCallback(window, mouse::mouseWheelCallback);
 
 	/*
 		shaders
@@ -176,6 +191,15 @@ int main() {
 
 	//shader_program2.activate();
 	//shader_program2.setMat4("transform", transform);
+	
+	mainJ.update();
+	if (mainJ.isPresent()) {
+		std::cout << mainJ.getName() << " is present" << std::endl;
+	}
+	else {
+		std::cout << "joystick not present" << std::endl;
+	}
+
 	while(!glfwWindowShouldClose(window)){
 		//process input
 		process_input(window);
@@ -202,6 +226,8 @@ int main() {
 		//glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		shader_program.activate();
+		shader_program.setFloat("mixRatio", mixRatio);
+		shader_program.setMat4("transform", transform);
 		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 
 		//shader_program2.activate();
@@ -230,6 +256,66 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height){
 
 
 void process_input(GLFWwindow* window){
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	if (keyboard::key(GLFW_KEY_ESCAPE) || mainJ.buttonState(GLFW_JOYSTICK_DPAD_RIGHT))
 		glfwSetWindowShouldClose(window, true);
+
+	// change mixRatio
+
+	if(keyboard::key(GLFW_KEY_UP))
+	{
+		if (mixRatio >= 1.0f)
+			mixRatio = 1.0f;
+		else
+			mixRatio += 0.05f;
+	}
+
+	if (keyboard::key(GLFW_KEY_DOWN))
+	{
+		if (mixRatio <= 0.0f)
+			mixRatio = 0.0f;
+		else
+			mixRatio -= 0.05f;
+	}
+
+	if (keyboard::key(GLFW_KEY_W)) {
+		transform = glm::translate(transform, glm::vec3(0.0f, 0.1f, 0.0f));
+	}
+
+	if (keyboard::key(GLFW_KEY_S)) {
+		transform = glm::translate(transform, glm::vec3(0.0f, -0.1f, 0.0f));
+	}
+
+	if (keyboard::key(GLFW_KEY_D)) {
+		transform = glm::translate(transform, glm::vec3(0.1f, 0.0f, 0.0f));
+	}
+
+	if (keyboard::key(GLFW_KEY_A)) {
+		transform = glm::translate(transform, glm::vec3(-0.1f, 0.0f, 0.0f));
+	}
+
+	mainJ.update();
+
+	float rt = mainJ.axesState(GLFW_JOYSTICK_AXES_RIGHT_TRIGGER) / 2 + 0.5f;
+	if (rt > 0.05f) {
+		transform = glm::scale(transform, glm::vec3(1 + rt / 10, 1 + rt / 10, 0.0f));
+	}
+
+	float lt = mainJ.axesState(GLFW_JOYSTICK_AXES_LEFT_TRIGGER) / 2 + 0.5f;
+	if (lt > 0.05f) {
+		transform = glm::scale(transform, glm::vec3(1 - lt / 10, 1 - lt / 10, 0.0f));
+	}
+
+	std::cout << "rt: " << rt <<  " lt: " << lt << std::endl;
+
+	float lx = mainJ.axesState(GLFW_JOYSTICK_AXES_LEFT_STICK_X);
+	float ly = -mainJ.axesState(GLFW_JOYSTICK_AXES_LEFT_STICK_Y);
+
+	if (std::abs(lx) > 0.5f) {
+		transform = glm::translate(transform, glm::vec3(lx / 10, 0.0f, 0.0f));
+	}
+	if (std::abs(ly) > 0.5f) {
+		transform = glm::translate(transform, glm::vec3(0.0f, ly / 10, 0.0f));
+	}
+
+
 }

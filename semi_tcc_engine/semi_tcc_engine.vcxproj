@@ -165,6 +165,9 @@
   <ItemGroup>
     <ClCompile Include="lib\glad.c" />
     <ClCompile Include="lib\stb.cpp" />
+    <ClCompile Include="src\io\joystick.cpp" />
+    <ClCompile Include="src\io\keyboard.cpp" />
+    <ClCompile Include="src\io\mouse.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\shader\shader.cpp" />
   </ItemGroup>
@@ -174,11 +177,15 @@
     <None Include="assets\vertex_shader.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\io\joystick.h" />
+    <ClInclude Include="src\io\keyboard.h" />
+    <ClInclude Include="src\io\mouse.h" />
     <ClInclude Include="src\shader\shader.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\akiraposter.jpg" />
     <Image Include="assets\croc_studios.jpg" />
+    <Image Include="assets\croc_studios.png" />
     <Image Include="assets\croki.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
