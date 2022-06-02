@@ -20,13 +20,15 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void process_input(GLFWwindow* window);
 
 float mixRatio = 0.5f;
-
+float FOV = 45.0f;
 glm::mat4 transform = glm::mat4(1.0f);
+
 joystick mainJ(0);
 
+unsigned int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 600;
+float x , y , z;
 
 int main() {
-
 	int success;
 	char infoLog[512];
 
@@ -39,10 +41,10 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif // __APPLE__ 
 
-	GLFWwindow* window = glfwCreateWindow(800, 600, "semi_tcc_engine", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "semi_tcc_engine", NULL, NULL);
 	if(window == NULL)
 	{
-		std::cout << "Failed to create GLFW Windows" << std::endl;
+		std::cout << "Failed to create GLFW Window" << std::endl;
 		glfwTerminate();
 		return -1;
 	}
@@ -56,7 +58,7 @@ int main() {
 		return -1;
 	}
 
-	glViewport(0, 0 ,  800, 600);
+	glViewport(0, 0 , SCREEN_WIDTH, SCREEN_HEIGHT);
 	
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetKeyCallback(window, keyboard::keyCallback);
@@ -64,6 +66,8 @@ int main() {
 	glfwSetCursorPosCallback(window, mouse::cursorPosCallback);
 	glfwSetMouseButtonCallback(window, mouse::mouseButtonCallback);
 	glfwSetScrollCallback(window, mouse::mouseWheelCallback);
+
+	glEnable(GL_DEPTH_TEST);
 
 	/*
 		shaders
@@ -73,6 +77,52 @@ int main() {
 	shader shader_program2("assets/vertex_shader.glsl", "assets/fragment_shader2.glsl");
 
 	// vertex data
+
+	float cube_vertices[] = {
+
+		// position           // texture coord 
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+	};
 
 	float square_vertices[] = {
 
@@ -109,31 +159,31 @@ int main() {
 	unsigned int VAO, VBO, EBO;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+	//glGenBuffers(1, &EBO);
 
 	// bind VAO
 	glBindVertexArray(VAO);
 
 	// bind VBO
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(square_vertices), square_vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
 
 	// set up EBO
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(square_indices), square_indices, GL_STATIC_DRAW);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(square_indices), square_indices, GL_STATIC_DRAW);
 
 	// set attribute pointer
 	// positions
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
 	// color
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
+	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	//glEnableVertexAttribArray(1);
 
 	// texture coordinates
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 
 
 	// textures
@@ -179,19 +229,6 @@ int main() {
 	shader_program.setInt("textureOne", 0);
 	shader_program.setInt("textureTwo", 1);
 
-	//glm::mat4 transform = glm::mat4(1.0f);
-	//transform = glm::rotate(transform, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-
-	//shader_program.activate();
-	//shader_program.setMat4("transform", transform);
-
-	//glm::mat4 transform2 = glm::mat4(1.0f);
-	//transform2 = glm::scale(transform2, glm::vec3(0.5f));
-	//transform2 = glm::rotate(transform2, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-
-	//shader_program2.activate();
-	//shader_program2.setMat4("transform", transform);
-	
 	mainJ.update();
 	if (mainJ.isPresent()) {
 		std::cout << mainJ.getName() << " is present" << std::endl;
@@ -200,42 +237,45 @@ int main() {
 		std::cout << "joystick not present" << std::endl;
 	}
 
+	x = 0.0f;
+	y = 0.0f;
+	z = 3.0f;
+
 	while(!glfwWindowShouldClose(window)){
 		//process input
 		process_input(window);
 
 		//rendering
 		glClearColor(0.5f, 0.0f, 0.5f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textureOne);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, textureTwo);
 
-		/*transform = glm::rotate(transform,  glm::radians((float)glfwGetTime() / 100.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		transform2 = glm::rotate(transform2, glm::radians((float)glfwGetTime() / -100.0f), glm::vec3(0.0f, 0.0f, 1.0f));*/
-
-		/*shader_program.setMat4("transform", transform);*/
-		shader_program2.activate();
-		//shader_program2.setMat4("transform", transform2);
-
 		// draw call
 		glBindVertexArray(VAO);
 
-		// first triangle
-		//glDrawArrays(GL_TRIANGLES, 0, 6);
+		// create transformation matrix
+		glm::mat4 model = glm::mat4(1.0f);
+		glm::mat4 view = glm::mat4(1.0f);
+		glm::mat4 projection = glm::mat4(1.0f);
+		
+		model = glm::rotate(model, glm::radians(-55.0f) * (float)glfwGetTime(), glm::vec3(0.5f));
+		view = glm::translate(view, glm::vec3(-x, -y, -z));
+		projection = glm::perspective(glm::radians(FOV), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.f);
 
+		// first triangle
 		shader_program.activate();
 		shader_program.setFloat("mixRatio", mixRatio);
-		shader_program.setMat4("transform", transform);
-		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+		shader_program.setMat4("model", model);
+		shader_program.setMat4("view", view);
+		shader_program.setMat4("projection", projection);
 
-		//shader_program2.activate();
-		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*) (3 * sizeof(unsigned int)));
-
-		// second triangle
-		//glUseProgram(shaderPrograms[0]);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		//glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 		//glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*) (3 * sizeof(unsigned int)));
+
 
 		// send new buffer to window
 		glfwSwapBuffers(window);
@@ -244,7 +284,7 @@ int main() {
 
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
+	//glDeleteBuffers(1, &EBO);
 
 	glfwTerminate();
 	return 0;
@@ -252,6 +292,8 @@ int main() {
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
 	glViewport(0, 0, width, height);
+	SCREEN_WIDTH = width;
+	SCREEN_HEIGHT = height;
 }
 
 
@@ -297,24 +339,30 @@ void process_input(GLFWwindow* window){
 
 	float rt = mainJ.axesState(GLFW_JOYSTICK_AXES_RIGHT_TRIGGER) / 2 + 0.5f;
 	if (rt > 0.05f) {
-		transform = glm::scale(transform, glm::vec3(1 + rt / 10, 1 + rt / 10, 0.0f));
+		FOV += 0.5f;
 	}
 
 	float lt = mainJ.axesState(GLFW_JOYSTICK_AXES_LEFT_TRIGGER) / 2 + 0.5f;
 	if (lt > 0.05f) {
-		transform = glm::scale(transform, glm::vec3(1 - lt / 10, 1 - lt / 10, 0.0f));
+		FOV -= 0.5f;
 	}
-
-	std::cout << "rt: " << rt <<  " lt: " << lt << std::endl;
 
 	float lx = mainJ.axesState(GLFW_JOYSTICK_AXES_LEFT_STICK_X);
 	float ly = -mainJ.axesState(GLFW_JOYSTICK_AXES_LEFT_STICK_Y);
 
 	if (std::abs(lx) > 0.5f) {
-		transform = glm::translate(transform, glm::vec3(lx / 10, 0.0f, 0.0f));
+		x += lx / 5.0f;
 	}
 	if (std::abs(ly) > 0.5f) {
-		transform = glm::translate(transform, glm::vec3(0.0f, ly / 10, 0.0f));
+		z += ly / 5.0f;
+	}
+
+	if (mainJ.buttonState(GLFW_JOYSTICK_BTN_DOWN)) {
+		y += 0.5f;
+	}
+
+	if (mainJ.buttonState(GLFW_JOYSTICK_BTN_RIGHT)) {
+		y -= 0.5f;
 	}
 
 
