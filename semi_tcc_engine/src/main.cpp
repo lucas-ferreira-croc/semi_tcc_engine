@@ -15,15 +15,26 @@
 #include "io/keyboard.h"
 #include "io/mouse.h"
 #include "io/joystick.h"
+#include "io/camera.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void process_input(GLFWwindow* window);
+void process_input(GLFWwindow* window, double deltaTime);
 
 float mixRatio = 0.5f;
 float FOV = 45.0f;
 glm::mat4 transform = glm::mat4(1.0f);
 
+camera cameras[2] = {
+	camera(glm::vec3(0.0f, 0.0f, 3.0f)),
+	camera(glm::vec3(5.0f, 5.0f, 5.0f))
+};
+	
+int active_camera = 1;
+double deltaTime = 0.0f;
+double lastFrame = 0.0f;
+
 joystick mainJ(0);
+
 
 unsigned int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 600;
 float x , y , z;
@@ -66,6 +77,8 @@ int main() {
 	glfwSetCursorPosCallback(window, mouse::cursorPosCallback);
 	glfwSetMouseButtonCallback(window, mouse::mouseButtonCallback);
 	glfwSetScrollCallback(window, mouse::mouseWheelCallback);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -242,8 +255,13 @@ int main() {
 	z = 3.0f;
 
 	while(!glfwWindowShouldClose(window)){
+		
+		double currentTime = glfwGetTime();
+		deltaTime = currentTime  - lastFrame;
+		lastFrame = currentTime;
+
 		//process input
-		process_input(window);
+		process_input(window, deltaTime);
 
 		//rendering
 		glClearColor(0.5f, 0.0f, 0.5f, 1.0f);
@@ -262,8 +280,9 @@ int main() {
 		glm::mat4 projection = glm::mat4(1.0f);
 		
 		model = glm::rotate(model, glm::radians(-55.0f) * (float)glfwGetTime(), glm::vec3(0.5f));
-		view = glm::translate(view, glm::vec3(-x, -y, -z));
-		projection = glm::perspective(glm::radians(FOV), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.f);
+		//view = glm::translate(view, glm::vec3(-x, -y, -z));
+		view = cameras[active_camera].getViewMatrix();
+		projection = glm::perspective(glm::radians(cameras[active_camera].zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.f);
 
 		// first triangle
 		shader_program.activate();
@@ -297,7 +316,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height){
 }
 
 
-void process_input(GLFWwindow* window){
+void process_input(GLFWwindow* window, double deltaTime){
 	if (keyboard::key(GLFW_KEY_ESCAPE) || mainJ.buttonState(GLFW_JOYSTICK_DPAD_RIGHT))
 		glfwSetWindowShouldClose(window, true);
 
@@ -318,52 +337,49 @@ void process_input(GLFWwindow* window){
 		else
 			mixRatio -= 0.05f;
 	}
+	
+	// move Camera
 
 	if (keyboard::key(GLFW_KEY_W)) {
-		transform = glm::translate(transform, glm::vec3(0.0f, 0.1f, 0.0f));
+		cameras[active_camera].updateCameraPos(cameraDirection::FOWARD, deltaTime);
 	}
-
+	
 	if (keyboard::key(GLFW_KEY_S)) {
-		transform = glm::translate(transform, glm::vec3(0.0f, -0.1f, 0.0f));
+		cameras[active_camera].updateCameraPos(cameraDirection::BACKWARD, deltaTime);
 	}
-
+	
 	if (keyboard::key(GLFW_KEY_D)) {
-		transform = glm::translate(transform, glm::vec3(0.1f, 0.0f, 0.0f));
+		cameras[active_camera].updateCameraPos(cameraDirection::RIGHT, deltaTime);
 	}
-
+	
 	if (keyboard::key(GLFW_KEY_A)) {
-		transform = glm::translate(transform, glm::vec3(-0.1f, 0.0f, 0.0f));
+		cameras[active_camera].updateCameraPos(cameraDirection::LEFT, deltaTime);
 	}
 
-	mainJ.update();
+	if (keyboard::key(GLFW_KEY_SPACE)) {
+		cameras[active_camera].updateCameraPos(cameraDirection::UP, deltaTime);
 
-	float rt = mainJ.axesState(GLFW_JOYSTICK_AXES_RIGHT_TRIGGER) / 2 + 0.5f;
-	if (rt > 0.05f) {
-		FOV += 0.5f;
 	}
 
-	float lt = mainJ.axesState(GLFW_JOYSTICK_AXES_LEFT_TRIGGER) / 2 + 0.5f;
-	if (lt > 0.05f) {
-		FOV -= 0.5f;
+	if (keyboard::key(GLFW_KEY_LEFT_SHIFT)) {
+		cameras[active_camera].updateCameraPos(cameraDirection::DOWN, deltaTime);
 	}
 
-	float lx = mainJ.axesState(GLFW_JOYSTICK_AXES_LEFT_STICK_X);
-	float ly = -mainJ.axesState(GLFW_JOYSTICK_AXES_LEFT_STICK_Y);
-
-	if (std::abs(lx) > 0.5f) {
-		x += lx / 5.0f;
-	}
-	if (std::abs(ly) > 0.5f) {
-		z += ly / 5.0f;
-	}
-
-	if (mainJ.buttonState(GLFW_JOYSTICK_BTN_DOWN)) {
-		y += 0.5f;
-	}
-
-	if (mainJ.buttonState(GLFW_JOYSTICK_BTN_RIGHT)) {
-		y -= 0.5f;
+	if (keyboard::keyWentUp(GLFW_KEY_TAB)) {
+		active_camera += (active_camera == 0) ? 1 : -1;
 	}
 
 
+	double dx = mouse::getDX();
+	double dy = mouse::getDY();
+
+	if (dx != 0 || dy != 0) {
+		cameras[active_camera].updateCameraDirection(dx, dy);
+	}
+
+	double scrollDy = mouse::getScrollDY();
+
+	if (scrollDy != 0) {
+		cameras[active_camera].updateCameraZoom(scrollDy);
+	}
 }
