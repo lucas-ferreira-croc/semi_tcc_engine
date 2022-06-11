@@ -20,6 +20,11 @@ class camera
 private:
 	void updateCameraVectors();
 
+	float yaw;
+	float pitch;
+	float speed;
+	float zoom;
+
 public:
 	glm::vec3 cameraPos;
 	glm::vec3 cameraFront;
@@ -28,10 +33,6 @@ public:
 
 	glm::vec3 worldUp;
 
-	float yaw;
-	float pitch;
-	float speed;
-	float zoom;
 
 	camera(glm::vec3 position);
 
@@ -40,6 +41,10 @@ public:
 	void updateCameraZoom(double dy);
 
 	glm::mat4 getViewMatrix();
+	float getYaw();
+	float getPitch();
+	float getSpeed();
+	float getZoom();
 };
 
 #endif // !CAMERA_H

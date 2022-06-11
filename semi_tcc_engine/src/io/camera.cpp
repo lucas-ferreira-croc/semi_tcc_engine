@@ -88,3 +88,23 @@ glm::mat4 camera::getViewMatrix()
 {
 	return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 }
+
+float camera::getYaw()
+{
+	return yaw;
+}
+
+float camera::getPitch()
+{
+	return pitch;
+}
+
+float camera::getSpeed()
+{
+	return speed;
+}
+
+float camera::getZoom()
+{
+	return zoom;
+}
