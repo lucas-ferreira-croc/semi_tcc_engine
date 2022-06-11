@@ -24,9 +24,6 @@
     <ClCompile Include="lib\stb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\shader\shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\io\joystick.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -39,16 +36,27 @@
     <ClCompile Include="src\io\camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\io\screen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\fragment_shader.glsl" />
-    <None Include="assets\vertex_shader.glsl" />
-    <None Include="assets\fragment_shader2.glsl" />
+    <None Include="assets\object.fs" />
+    <None Include="assets\object.vs" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\shader\shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\io\joystick.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -61,18 +69,36 @@
     <ClInclude Include="src\io\camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\io\screen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\models\cube.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\croki.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="assets\akiraposter.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="assets\croc_studios.jpg">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="assets\croc_studios.png">
+    <Image Include="assets\image1.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\image2.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
